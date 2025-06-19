@@ -15,5 +15,5 @@ ${FG[130]}%1~%{$reset_color%} \$(git_prompt_info)${FG[006]}»%{$reset_color%} "
 PS2="%{$fg[red]%}\ %{$reset_color%}"
 
 
-# right prompt: return code:, and user@host
-RPS1=" ${FG[237]}%n@%m%{$reset_color%}"
+# right prompt: current time
+RPS1=" ${FG[237]}%T%{$reset_color%}"
