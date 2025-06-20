@@ -4,6 +4,8 @@
 
 [tpm](https://github.com/tmux-plugins/tpm)
 
+[catppuccin](https://github.com/catppuccin/tmux)
+
 # Setup
 
 the `tmux.conf` can be stored in the `~/.config/tmux/` directory
