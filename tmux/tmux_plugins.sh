@@ -31,7 +31,7 @@ else
 fi
 if [ ! -d "$HOME$PLUGINS_DIR/catppuccin/tmux" ]; then
     echo "installing catppucin"
-    git clone latest@https://github.com/catppuccin/tmux.git ~/.config/tmux/plugins/catppuccin/tmux
+    git clone https://github.com/catppuccin/tmux ~/.config/tmux/plugins/catppuccin/tmux
 else
     echo "catppuccin already installed"
 fi
