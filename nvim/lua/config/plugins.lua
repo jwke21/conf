@@ -77,6 +77,12 @@ require('lazy').setup({
         dependencies = { "nvim-lua/plenary.nvim" }
     },
 
+    -- fzf Telescope extension (C shared library, faster than Telescope's default Lua sorter)
+    {
+        "nvim-telescope/telescope-fzf-native.nvim",
+        build = "make",
+    },
+
     -- Key binding helper
     {
         "folke/which-key.nvim",

@@ -37,7 +37,7 @@ if not setup_ok then
 end
 
 -- Load telescope extensions if available
-pcall(function() require('telescope').load_extension('fzf') end)
+require('telescope').load_extension('fzf')
 
 -- Useful Telescope mappings with error handling
 local builtin_ok, builtin = pcall(require, 'telescope.builtin')
@@ -50,5 +50,3 @@ if builtin_ok then
     vim.keymap.set('n', '<leader>fd', builtin.lsp_definitions, { desc = "Find definitions" })
     vim.keymap.set('n', '<leader>fr', builtin.lsp_references, { desc = "Find references" })
 end
-
-print("Fuzzy finder initialized!")
