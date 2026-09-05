@@ -14,8 +14,10 @@ vim.o.splitbelow = true     -- horizontal splits open below
 vim.o.splitright = true     -- vertical splits open to the right
 
 -- Search behavior
-vim.o.ignorecase = true -- case-insensitive search...
-vim.o.smartcase = true  -- ...unless the query contains a capital
+vim.o.ignorecase = true  -- case-insensitive search...
+vim.o.smartcase = true   -- ...unless the query contains a capital
+vim.opt.incsearch = true -- Show matches while typing
+vim.opt.hlsearch = true  -- Highlight matches
 
 -- Editing quality of life
 vim.o.undofile = true    -- persist undo history across sessions
@@ -26,10 +28,6 @@ vim.o.signcolumn = "yes" -- always show gutter; prevents text jitters
 -- Syntax highlighting and filetype plugins
 vim.cmd('syntax enable')
 vim.cmd('filetype plugin indent on')
-
--- Search settings
-vim.opt.incsearch = true -- Show matches while typing
-vim.opt.hlsearch = true  -- Highlight matches
 
 -- Leader key
 vim.g.mapleader = ' ' -- Space as the leader key
