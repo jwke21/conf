@@ -51,10 +51,10 @@ require('lazy').setup({
     {
         "hrsh7th/nvim-cmp",
         dependencies = {
-            "hrsh7th/cmp-nvim-lsp", -- LSP source for nvim-cmp
-            "hrsh7th/cmp-buffer", -- Buffer source
-            "hrsh7th/cmp-path",   -- Path source
-            "L3MON4D3/LuaSnip",   -- Snippet engine
+            "hrsh7th/cmp-nvim-lsp",     -- LSP source for nvim-cmp
+            "hrsh7th/cmp-buffer",       -- Buffer source
+            "hrsh7th/cmp-path",         -- Path source
+            "L3MON4D3/LuaSnip",         -- Snippet engine
             "saadparwaiz1/cmp_luasnip", -- Snippet source
         },
     },
@@ -62,6 +62,12 @@ require('lazy').setup({
     -- File explorer
     {
         "nvim-tree/nvim-tree.lua",
+        dependencies = { "nvim-tree/nvim-web-devicons" },
+    },
+
+    -- Lualine status bar
+    {
+        "nvim-lualine/lualine.nvim",
         dependencies = { "nvim-tree/nvim-web-devicons" },
     },
 
