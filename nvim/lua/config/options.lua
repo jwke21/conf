@@ -6,12 +6,22 @@ vim.o.relativenumber = true -- Relative line numbers
 vim.o.tabstop = 4           -- Number of spaces a tab represents
 vim.o.shiftwidth = 4        -- Number of spaces for each indentation
 vim.o.expandtab = true      -- Convert tabs to spaces
--- vim.o.smartindent = true      -- Automatically indent new lines
+-- vim.o.smartindent = true      -- Automatically indent new lines (not needed because of treesitter's indent)
 vim.o.wrap = false          -- Line wrapping
 vim.o.cursorline = true     -- Highlight current line
 vim.o.termguicolors = true  -- Enable 24-bit RGB colors
 vim.o.splitbelow = true     -- horizontal splits open below
 vim.o.splitright = true     -- vertical splits open to the right
+
+-- Search behavior
+vim.o.ignorecase = true -- case-insensitive search...
+vim.o.smartcase = true  -- ...unless the query contains a capital
+
+-- Editing quality of life
+vim.o.undofile = true    -- persist undo history across sessions
+vim.o.scrolloff = 8      -- keep 8 lines of context around the cursor
+vim.o.updatetime = 250   -- faster CursorHold (diagnostics, gitsigns)
+vim.o.signcolumn = "yes" -- always show gutter; prevents text jitters
 
 -- Syntax highlighting and filetype plugins
 vim.cmd('syntax enable')
