@@ -27,6 +27,13 @@ vim.api.nvim_set_keymap('n', '<Leader>w', ':w<CR>', { noremap = true, silent = t
 
 vim.opt.clipboard = "unnamedplus"
 
+
+-- Terminal window settings
+
+-- open new terminal with "<Space>t"
+vim.keymap.set("n", "<leader>t", "<cmd>botright split | resize 15 | terminal<CR>", {
+    desc = "Terminal below",
+})
 -- map <Esc> to exit terminal
 vim.keymap.set("t", "<Esc>", "<C-\\><C-n>", {
     desc = "Exit terminal mode",
