@@ -1,0 +1,229 @@
+#!/bin/bash
+#
+# setup-nvim - prepare a machine to run this Neovim configuration.
+#
+# Usage:
+#   ./bin/setup-nvim           install missing dependencies and link the config
+#   ./bin/setup-nvim --check   report what's missing, change nothing
+#
+# Safe to re-run: every step checks before it acts.
+
+set -euo pipefail
+
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+NVIM_CONFIG="$HOME/.config/nvim"
+MIN_NVIM="0.12.0"
+MIN_TREE_SITTER="0.26.1"
+
+CHECK_ONLY=0
+if [ "${1:-}" = "--check" ]; then
+    CHECK_ONLY=1
+    echo "== check only: nothing will be installed or changed =="
+fi
+
+MISSING=""
+
+# type -P searches PATH for an executable only, ignoring shell functions
+# and aliases that would make `command -v` report a false positive.
+have() { type -P "$1" >/dev/null 2>&1; }
+
+# true if $1 >= $2
+version_ge() {
+    [ "$(printf '%s\n%s\n' "$2" "$1" | sort -V | head -n1)" = "$2" ]
+}
+
+note_missing() { MISSING="$MISSING $1"; }
+
+# ---------------------------------------------------------------- platform
+case "$(uname -s)" in
+    Darwin)
+        OS="macos"
+        PKG="brew"
+        ;;
+    Linux)
+        OS="linux"
+        if have apt-get; then PKG="apt"
+        elif have dnf;   then PKG="dnf"
+        elif have pacman; then PKG="pacman"
+        else PKG="unknown"
+        fi
+        ;;
+    *)
+        echo "unsupported OS: $(uname -s)"
+        exit 1
+        ;;
+esac
+
+echo "==> platform: $OS (package manager: $PKG)"
+echo "==> repo:     $REPO_DIR"
+echo
+
+pkg_install() {
+    local pkg="$1"
+    if [ "$CHECK_ONLY" = "1" ]; then
+        echo "    would install: $pkg"
+        return 0
+    fi
+    echo "    installing $pkg..."
+    case "$PKG" in
+        brew)   brew install "$pkg" ;;
+        apt)    sudo apt-get install -y "$pkg" ;;
+        dnf)    sudo dnf install -y "$pkg" ;;
+        pacman) sudo pacman -S --noconfirm "$pkg" ;;
+        *)      echo "    !! no known package manager; install '$pkg' manually" ;;
+    esac
+}
+
+# ---------------------------------------------------------------- neovim
+# Not auto-installed: distro packages are often too old, and building from
+# source is a bigger commitment than this script should make on its own.
+echo "-- neovim (>= $MIN_NVIM)"
+if have nvim; then
+    NVIM_VER="$(nvim --version | head -n1 | sed 's/^NVIM v//' | cut -d- -f1)"
+    if version_ge "$NVIM_VER" "$MIN_NVIM"; then
+        echo "    ok: v$NVIM_VER"
+    else
+        echo "    !! v$NVIM_VER is too old; nvim-treesitter 'main' needs >= $MIN_NVIM"
+        case "$OS" in
+            macos) echo "       brew install neovim" ;;
+            linux) echo "       build from source, or use the appimage:" ;;
+        esac
+        echo "       https://github.com/neovim/neovim/blob/master/BUILD.md"
+        note_missing "neovim"
+    fi
+else
+    echo "    !! not installed"
+    note_missing "neovim"
+fi
+
+# ---------------------------------------------------------------- compiler
+echo "-- C compiler and make"
+if have cc && have make; then
+    echo "    ok"
+else
+    echo "    !! missing"
+    case "$OS" in
+        macos) echo "       xcode-select --install" ;;
+        linux) pkg_install build-essential ;;
+    esac
+fi
+
+# ---------------------------------------------------------------- git/curl/tar
+echo "-- git, curl, tar"
+for tool in git curl tar; do
+    if have "$tool"; then
+        echo "    ok: $tool"
+    else
+        echo "    !! $tool missing"
+        pkg_install "$tool"
+    fi
+done
+
+# ---------------------------------------------------------------- tree-sitter
+# Required by nvim-treesitter 'main' to build parsers. Must come from a
+# package manager or cargo -- the npm build is explicitly unsupported.
+echo "-- tree-sitter CLI (>= $MIN_TREE_SITTER)"
+if have tree-sitter; then
+    TS_VER="$(tree-sitter --version | awk '{print $2}')"
+    if version_ge "$TS_VER" "$MIN_TREE_SITTER"; then
+        echo "    ok: $TS_VER"
+    else
+        echo "    !! $TS_VER is too old (need >= $MIN_TREE_SITTER)"
+        note_missing "tree-sitter"
+    fi
+else
+    echo "    !! not installed"
+    if [ "$PKG" = "brew" ]; then
+        pkg_install tree-sitter
+    elif have cargo; then
+        if [ "$CHECK_ONLY" = "1" ]; then
+            echo "    would run: cargo install tree-sitter-cli"
+        else
+            echo "    installing via cargo (this compiles; takes a few minutes)..."
+            cargo install tree-sitter-cli
+        fi
+    else
+        echo "    !! need brew or cargo to install the tree-sitter CLI"
+        echo "       https://rustup.rs then: cargo install tree-sitter-cli"
+        note_missing "tree-sitter"
+    fi
+fi
+
+# ---------------------------------------------------------------- ripgrep
+# telescope's live_grep shells out to 'rg' directly.
+echo "-- ripgrep (telescope live_grep)"
+if have rg; then
+    echo "    ok"
+else
+    echo "    !! not installed"
+    pkg_install ripgrep
+fi
+
+# ---------------------------------------------------------------- go tooling
+echo "-- go toolchain and goimports"
+if have go; then
+    echo "    ok: $(go version | awk '{print $3}')"
+    if have goimports; then
+        echo "    ok: goimports"
+    else
+        echo "    !! goimports missing (conform's only Go formatter)"
+        if [ "$CHECK_ONLY" = "1" ]; then
+            echo "    would run: go install golang.org/x/tools/cmd/goimports@latest"
+        else
+            go install golang.org/x/tools/cmd/goimports@latest
+            echo "       make sure \$(go env GOPATH)/bin is on your PATH"
+        fi
+    fi
+else
+    echo "    -- go not installed; skipping (only needed for Go development)"
+fi
+
+# ---------------------------------------------------------------- symlink
+echo "-- linking $NVIM_CONFIG -> $REPO_DIR/nvim"
+if [ -L "$NVIM_CONFIG" ]; then
+    CURRENT="$(readlink -f "$NVIM_CONFIG")"
+    if [ "$CURRENT" = "$REPO_DIR/nvim" ]; then
+        echo "    ok: already linked"
+    else
+        echo "    !! links elsewhere: $CURRENT"
+        echo "       remove it first, then re-run"
+    fi
+elif [ -e "$NVIM_CONFIG" ]; then
+    echo "    !! $NVIM_CONFIG exists and is not a symlink"
+    if [ "$CHECK_ONLY" = "1" ]; then
+        echo "    would back it up to $NVIM_CONFIG.bak and link"
+    else
+        echo "    backing up to $NVIM_CONFIG.bak"
+        mv "$NVIM_CONFIG" "$NVIM_CONFIG.bak"
+        ln -s "$REPO_DIR/nvim" "$NVIM_CONFIG"
+        echo "    linked"
+    fi
+else
+    if [ "$CHECK_ONLY" = "1" ]; then
+        echo "    would create the symlink"
+    else
+        mkdir -p "$(dirname "$NVIM_CONFIG")"
+        ln -s "$REPO_DIR/nvim" "$NVIM_CONFIG"
+        echo "    linked"
+    fi
+fi
+
+# ---------------------------------------------------------------- bootstrap
+echo
+if [ -n "$MISSING" ]; then
+    echo "==> unresolved:$MISSING"
+    echo "    install the above, then re-run this script."
+    exit 1
+fi
+
+if [ "$CHECK_ONLY" = "1" ]; then
+    echo "==> check complete; nothing was changed."
+    exit 0
+fi
+
+echo "==> bootstrapping plugins (this clones and compiles; be patient)"
+nvim --headless "+Lazy! install" +qa
+
+echo
+echo "==> done. Start nvim; parsers and LSP servers install on first launch."
+echo "    Verify with :checkhealth"
