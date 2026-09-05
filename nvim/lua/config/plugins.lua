@@ -80,6 +80,16 @@ require('lazy').setup({
     -- Key binding helper
     {
         "folke/which-key.nvim",
+        event = "VeryLazy",
+        opts = {
+            preset = "modern",
+            spec = {
+                { "<leader>f", group = "find" },
+                { "<leader>c", group = "code" },
+                { "<leader>l", group = "lsp" },
+                { "<leader>r", group = "rename" },
+            },
+        },
     },
 
     -- Autopairs
