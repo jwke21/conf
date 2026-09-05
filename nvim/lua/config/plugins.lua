@@ -35,6 +35,9 @@ require('lazy').setup({
         lazy = false,
         build = ':TSUpdate',
         priority = 100, -- Load early
+        dependencies = {
+            { 'nvim-treesitter/nvim-treesitter-textobjects', branch = 'master' },
+        },
     },
 
     -- Language Server Protocol support
@@ -66,6 +69,15 @@ require('lazy').setup({
         dependencies = { "nvim-tree/nvim-web-devicons" },
     },
 
+    -- Git integration
+    {
+        "lewis6991/gitsigns.nvim",
+        event = { "BufReadPre", "BufNewFile" },
+        opts = {
+            current_line_blame = false, -- toggle with <leader>gb
+        },
+    },
+
     -- Lualine status bar
     {
         "nvim-lualine/lualine.nvim",
@@ -95,6 +107,7 @@ require('lazy').setup({
                 { "<leader>c", group = "code" },
                 { "<leader>l", group = "lsp" },
                 { "<leader>r", group = "rename" },
+                { "<leader>g", group = "git" },
             },
         },
     },

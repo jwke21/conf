@@ -14,3 +14,4 @@ require('config.telescope')  -- Often integrates with LSP
 require('config.theme')
 require('config.statusline')
 require('config.explorer')
+require('config.git')
