@@ -31,13 +31,15 @@ require('lazy').setup({
     -- Treesitter for syntax highlighting
     {
         'nvim-treesitter/nvim-treesitter',
-        branch = 'master',
+        branch = 'main',
         lazy = false,
         build = ':TSUpdate',
         priority = 100, -- Load early
-        dependencies = {
-            { 'nvim-treesitter/nvim-treesitter-textobjects', branch = 'master' },
-        },
+    },
+    {
+        'nvim-treesitter/nvim-treesitter-textobjects',
+        branch = 'main',
+        lazy = false,
     },
 
     -- Language Server Protocol support
