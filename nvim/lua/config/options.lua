@@ -10,6 +10,8 @@ vim.o.expandtab = true      -- Convert tabs to spaces
 vim.o.wrap = false          -- Line wrapping
 vim.o.cursorline = true     -- Highlight current line
 vim.o.termguicolors = true  -- Enable 24-bit RGB colors
+vim.o.splitbelow = true     -- horizontal splits open below
+vim.o.splitright = true     -- vertical splits open to the right
 
 -- Syntax highlighting and filetype plugins
 vim.cmd('syntax enable')
@@ -24,3 +26,8 @@ vim.g.mapleader = ' ' -- Space as the leader key
 vim.api.nvim_set_keymap('n', '<Leader>w', ':w<CR>', { noremap = true, silent = true })
 
 vim.opt.clipboard = "unnamedplus"
+
+-- map <Esc> to exit terminal
+vim.keymap.set("t", "<Esc>", "<C-\\><C-n>", {
+    desc = "Exit terminal mode",
+})
