@@ -13,12 +13,19 @@ require("mason").setup({
 require("mason-lspconfig").setup({
     -- Automatically install these servers
     ensure_installed = {
-        "lua_ls", -- Lua
-        -- "pyright",        -- Python
-        -- "tsserver",       -- TypeScript/JavaScript
+        "lua_ls",        -- Lua
+        "pyright",       -- Python
+        "ts_ls",         -- TypeScript/JavaScript
         "rust_analyzer", -- Rust
         "gopls",         -- Go
-        --  "clangd",      -- C/C++
+        "clangd",        -- C/C++
+        "bashls",        -- Bash
+        "marksman",      -- Markdown
+        "taplo",         -- TOML
+        "jsonls",        -- JSON
+        "yamlls",        -- YAML
+        "dockerls",      -- Docker
+        "terraformls",   -- Terraform
     },
 })
 
