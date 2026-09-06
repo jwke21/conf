@@ -12,6 +12,23 @@ zsh/      zsh theme
 bin/      setup scripts
 ```
 
+# Table of Contents
+
+- [Neovim](#neovim)
+    - [Quick start](#quick-start)
+    - [Prereqs](#prereqs)
+        - [For Go development](#for-go-development)
+        - [Fonts](#fonts)
+    - [Manual setup](#manual-setup)
+    - [What's configured](#whats-configured)
+    - [Keymaps](#keymaps)
+    - [Changing the theme](#changing-the-theme)
+        - [Switching catppuccin flavour](#switching-catppuccin-flavour)
+        - [Switching to a different colorscheme](#switching-to-a-different-colorscheme)
+        - [Verifying it took](#verifying-it-took)
+        - [Gotchas worth knowing](#gotchas-worth-knowing)
+    - [Notes](#notes)
+
 # Neovim
 
 ## Quick start
@@ -104,6 +121,82 @@ Leader is `<Space>`. Press it alone to see everything via which-key.
 | `]m` / `[m` | next / previous function |
 | `af` `if` `ac` `ic` `aa` `ia` | select function / struct / parameter |
 | `<Esc>` (terminal) | leave terminal mode |
+
+## Changing the theme
+
+Two files are involved: `nvim/lua/config/theme.lua` sets the colorscheme,
+`nvim/lua/config/statusline.lua` tells lualine to match it.
+
+### Switching catppuccin flavour
+
+Change one line in `theme.lua`:
+
+```lua
+flavour = "mocha",   -- latte | frappe | macchiato | mocha
+```
+
+`latte` is the light one. Nothing else needs to change — `statusline.lua` uses
+the `catppuccin-nvim` lualine theme, which follows whatever flavour is active.
+
+Note the **British spelling**. `flavor` is silently ignored: unknown keys are
+merged and dropped, so you get the default (mocha on a dark background) with no
+error to explain why.
+
+### Switching to a different colorscheme
+
+1. Replace the plugin in `plugins.lua`, keeping `priority = 1000` so it loads
+   before everything else:
+
+   ```lua
+   {
+       "folke/tokyonight.nvim",
+       priority = 1000,
+   },
+   ```
+
+2. Rewrite `theme.lua` for the new plugin. The `integrations` block is
+   catppuccin-specific and does not carry over — most themes either style
+   plugins automatically or use their own option names.
+
+   ```lua
+   require("tokyonight").setup({ style = "night" })
+   vim.cmd.colorscheme("tokyonight")
+   ```
+
+3. Update lualine's theme in `statusline.lua`:
+
+   ```lua
+   theme = "tokyonight",
+   ```
+
+   Use `"auto"` if the theme has no dedicated lualine palette — lualine will
+   derive one from the active highlight groups.
+
+4. `:Lazy install`, then restart.
+
+### Verifying it took
+
+```vim
+:colorscheme
+```
+
+prints the active scheme. If it reports something unexpected — `default` or
+`habamax` — the colorscheme failed to load and Neovim fell back silently.
+Check `:messages`.
+
+For lualine, a mismatched theme name is not an error either; it warns and uses
+its default palette. `:LualineNotices` lists any problems.
+
+### Gotchas worth knowing
+
+- **Theme plugins rename their lualine themes.** This config used
+  `theme = "catppuccin"` until an update renamed the file to `catppuccin-nvim`.
+  If the statusline suddenly looks unstyled after an update, check
+  `ls ~/.local/share/nvim/lazy/<plugin>/lua/lualine/themes/` for the real name.
+- **`priority = 1000` means "load first"**, not last. Colorschemes reset every
+  highlight group, so anything defining custom highlights must run after.
+- **Load order in `init.lua` matters**: `config.theme` is required before
+  `config.statusline` so lualine can read the active colorscheme.
 
 ## Notes
 
