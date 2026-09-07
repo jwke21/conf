@@ -49,3 +49,11 @@ vim.keymap.set("n", "<leader>t", "<cmd>botright split | resize 15 | terminal<CR>
 vim.keymap.set("t", "<Esc>", "<C-\\><C-n>", {
     desc = "Exit terminal mode",
 })
+
+-- Window splits
+vim.keymap.set("n", "<leader>v", "<cmd>vsplit<CR>", {
+    desc = "Vertical split",
+})
+vim.keymap.set("n", "<leader>s", "<cmd>split<CR>", {
+    desc = "Horizontal split",
+})
